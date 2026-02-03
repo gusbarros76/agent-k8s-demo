@@ -33,3 +33,14 @@ curl -X POST http://127.0.0.1:8000/run \
 ```bash
 uv run pytest
 ```
+
+## Docker
+Build the image:
+```bash
+docker build -t agent-api-demo .
+```
+
+Run the container:
+```bash
+docker run --rm -p 8000:8000 agent-api-demo
+```
