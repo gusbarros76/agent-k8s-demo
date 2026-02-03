@@ -44,3 +44,6 @@ Run the container:
 ```bash
 docker run --rm -p 8000:8000 agent-api-demo
 ```
+
+## CI
+GitHub Actions runs tests on every push and pull request to `main` using Python 3.12 and `uv`.
