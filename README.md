@@ -1,49 +1,61 @@
-# Agent API Demo
+# agent-k8s-demo
 
-Minimal FastAPI service that exposes a fake "agent" API.
+This repository demonstrates a Kubernetes-native AI agent implemented as a FastAPI service. The application is designed to run in a containerized, cloud-native environment and to integrate cleanly with external AI services through a single, structured invocation endpoint.
 
-## Requirements
-- Python 3.12
-- uv
+The project emphasizes real CI/CD behavior, multi-architecture container images, and secure secret handling. It is intentionally minimal in scope to focus on operational correctness, runtime safety, and production-ready integration patterns.
 
-## Local setup
-```bash
-uv venv
-source .venv/bin/activate
-uv pip install -e ".[dev]"
+## Architecture (high level)
+
+Client
+  -> FastAPI AI Agent
+      -> OpenAI API
+  -> Kubernetes Service
+      -> Pod (container)
+
+## Key Technical Highlights
+
+- Real multi-arch Docker builds (amd64 + arm64) using QEMU
+- Clean OCI manifests (no unknown artifacts)
+- Kubernetes-native secret injection
+- Stateless AI agent design
+- Proper local access via kubectl port-forward
+- CI as the source of truth for runtime artifacts
+
+## API Contract
+
+POST /invoke
+
+Minimal request:
+
+```json
+{
+  "input": "string",
+  "context": {
+    "optional_key": "optional_value"
+  }
+}
 ```
 
-## Run the server
-```bash
-uv run uvicorn app.main:app --reload
+Minimal response:
+
+```json
+{
+  "output": "string",
+  "model": "string",
+  "latency_ms": 123.45
+}
 ```
 
-## Example requests
-```bash
-curl http://127.0.0.1:8000/health
-```
+## Security Model
 
-```bash
-curl -X POST http://127.0.0.1:8000/run \
-  -H "Content-Type: application/json" \
-  -d '{"input":"hello"}'
-```
+Secrets are never committed to the repository. API keys are injected at runtime via Kubernetes Secrets, keeping the codebase safe to be public while maintaining operational security.
 
-## Run tests
-```bash
-uv run pytest
-```
+## Local Development (minimal)
 
-## Docker
-Build the image:
-```bash
-docker build -t agent-api-demo .
-```
+- Create a Kubernetes Secret that provides `OPENAI_API_KEY`.
+- Deploy the manifests for the service and its dependencies.
+- Access the service locally with `kubectl port-forward`.
 
-Run the container:
-```bash
-docker run --rm -p 8000:8000 agent-api-demo
-```
+## Scope & Next Steps
 
-## CI
-GitHub Actions runs tests on every push and pull request to `main` using Python 3.12 and `uv`.
+Out of scope for this repo: authentication, persistence, tool calling, ingress, and production hardening. These are deliberate omissions to keep the focus on the Kubernetes-native agent workflow and CI-managed artifacts.
